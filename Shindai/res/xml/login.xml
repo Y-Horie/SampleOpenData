@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <PreferenceCategory
+    android:title="@string/login_title">
+
+    <!-- IDのところ -->
+    <EditTextPreference
+        android:key="edittext"
+        android:title="ログインID"
+        android:summary="ログインID"
+        android:dialogTitle="ACSUのログインIDを入力してください"
+    />
+
+    <!-- パスワードを保持させるかどうか -->
+    <CheckBoxPreference
+        android:key="savePass"
+        android:title="パスワードを記憶しますか？"
+        android:summary="CheckBoxPreference"
+    />
+
+    <!-- パスワードのところ -->
+    <EditTextPreference
+        android:dependency="savePass"
+        android:key="loginPass"
+        android:title="ログインPass"
+        android:summary="パスワードは表示されません"
+        android:dialogTitle="ACSUのログインPassを入力してください"
+        android:inputType="textPassword"
+    />
+
+    <!-- 表示させる数を変えられるように -->
+    <ListPreference
+         android:key="put_num"
+         android:title="表示させる数"
+         android:summary="表示させるデータ数を選択してください"
+         android:entries="@array/num_entry"
+         android:entryValues="@array/num_entry2"
+         android:dialogTitle="表示させるデータ数" />
+
+
+  </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Shindai</string>
+    <string name="login_title">ログイン</string>
+    <string name="main_text">設定変更はメニューボタンから行ってください。</string>
+    <string name="main_nitiji">取得するデータの範囲を選んでください。　※省略可</string>
+    <string name="but_send">取得</string>
+    <string name="kara">から</string>
+
+    <string name="menu1">更新</string>
+    <string name="menu2">設定</string>
+    <string name="menu3">取説</string>
+    <string name="menu4">終了</string>
+
+    <string name="bukyoku">開講部局：</string>
+    <string name="start">開始：</string>
+    <string name="end">終了：</string>
+
+    <string name="spnBukyoku">開講部局</string>
+
+</resources>

@@ -3,40 +3,6 @@ package jp.ac.shinshu_u;
 
 public class SetCodelist{
 
-	//部局名称
-	//※この部分を要相談
-	final static String[] name = {
-		"全て",
-		"人文",
-		"教育",
-		"経済",
-		"理学",
-		"医学",
-		"工学",
-		"農学",
-		"繊維",
-		"共通",
-		"人修",
-		"教修",
-		"経修",
-		"医修",
-		"医博",
-		"医系修",
-		"医系博",
-		"医博前",
-		"医博後",
-		"理修",
-		"工修",
-		"繊維修",
-		"理工理",
-		"理工工",
-		"理工繊",
-		"工博",
-		"総工",
-		"農修",
-		"法科",
-	};
-
 	enum CodeList {
 		ALL("全て"),
 		L("人文"),
@@ -72,19 +38,15 @@ public class SetCodelist{
 		CodeList(String name) {
 			this.name = name;
 		}
+
 		public String getName() {
 			return name;
 		}
-	}
-	public String getCode(String key) {
-		String code = "";
 
-		for (CodeList m : CodeList.values()) {
-			if(m.getName().equals((key))){
-				code = m.toString();
-			}
+		@Override
+		public String toString() {
+			return name;
 		}
-		return code;
 	}
 
 }

@@ -296,9 +296,6 @@ public class MainActivity extends Activity {
 					setStartButton.setText("指定無");
 					attention = SetConstant.a_;
 					start_s = SetConstant.off;
-
-					gakuseki = (TextView)findViewById(R.id.end);
-					gakuseki.setText("終了日：" + end);
 				}
 			}
 		});

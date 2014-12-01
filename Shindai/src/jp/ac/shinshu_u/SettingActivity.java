@@ -19,6 +19,7 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 	private ListPreference list;
 	private EditTextPreference edittext;
 	private CheckBoxPreference checkbox;
+	private CheckBoxPreference AutoCheck;
 
 	@Override
 	public void onCreate(Bundle bundle) {
@@ -32,12 +33,15 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 		list = (ListPreference)findPreference("put_num");
 		edittext = (EditTextPreference)findPreference("edittext");
 		checkbox = (CheckBoxPreference)findPreference("savePass");
+		AutoCheck = (CheckBoxPreference)findPreference("autocheck");
 
 
 		// リスナーを設定する
 		list.setOnPreferenceChangeListener(this);
 		edittext.setOnPreferenceChangeListener(this);
 		checkbox.setOnPreferenceChangeListener(this);
+		edittext.setOnPreferenceChangeListener(this);
+		AutoCheck.setOnPreferenceChangeListener(this);
 
 		// 保存されたデータを読み込む
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
@@ -46,16 +50,19 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 		String param_list = p.getString("put_num", "5");
 		String param_edittext = p.getString("edittext", "Unselected");
 		boolean param_checkbox = p.getBoolean("savePass", false);
+		boolean param_AutoCheck = p.getBoolean("autocheck", false);
 
 		// デフォルト値の設定
 		list.setDefaultValue(param_list);
 		edittext.setDefaultValue(param_edittext);
 		checkbox.setDefaultValue(param_checkbox);
+		AutoCheck.setDefaultValue(param_AutoCheck);
 
 		// サマリーの設定
 		setSummary(list, param_list);
 		setSummary(edittext, param_edittext);
 		setSummary(checkbox, param_checkbox);
+		setSummary(AutoCheck, param_AutoCheck);
 
 		Button button = (Button) findViewById(R.id.button);
 
@@ -86,7 +93,7 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 
 				// preferenceの型でサマリーの設定を分ける
 				if(preference instanceof ListPreference)
-		            setSummary((ListPreference)preference, (String)newValue);
+					setSummary((ListPreference)preference, (String)newValue);
 				else if(preference instanceof EditTextPreference)
 					setSummary((EditTextPreference)preference, (String)newValue);
 			}else if(newValue instanceof Boolean){
@@ -98,15 +105,15 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 	}
 
 	// Summaryを設定（リスト）
-    public void setSummary(ListPreference lp, String param){
+	public void setSummary(ListPreference lp, String param){
 
-	if(param == null){
-    	    lp.setSummary("初期値は5です");
-	}else{
-	    lp.setSummary("Selected「" + param + "」");
+		if(param == null){
+			lp.setSummary("初期値は5です");
+		}else{
+			lp.setSummary("Selected「" + param + "」");
+		}
+		param = null;
 	}
-	param = null;
-    }
 
 	// Summaryを設定（エディットテキスト）
 	private void setSummary(EditTextPreference ep, String param) {
@@ -119,25 +126,27 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 	}
 
 	// Summaryを設定（チェックボックス）
-	public void setSummary(CheckBoxPreference cp, Boolean param){
+	public void setSummary(CheckBoxPreference cp, boolean param){
 		if(param){
-			cp.setSummary("保存する");
+			cp.setSummary("する");
 		}else{
-			cp.setSummary("保存しない");
+			cp.setSummary("しない");
 		}
 		param = false;
 	}
-//
+
 	// Activity破棄時に実行
 	public void onDestroy(){
 		super.onDestroy();
 		list.setOnPreferenceChangeListener(null);
 		edittext.setOnPreferenceChangeListener(null);
 		checkbox.setOnPreferenceChangeListener(null);
+		AutoCheck.setOnPreferenceChangeListener(null);
 
 		list = null;
 		edittext = null;
 		checkbox = null;
+		AutoCheck = null;
 	}
 
 	// Activityの再開時に実行
@@ -146,6 +155,7 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 		list.setEnabled(true);
 		edittext.setEnabled(true);
 		checkbox.setEnabled(true);
+		AutoCheck.setEnabled(true);
 	}
 
 	// Activityの停止時に実行
@@ -154,6 +164,7 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 		list.setEnabled(false);
 		edittext.setEnabled(false);
 		checkbox.setEnabled(false);
+		AutoCheck.setEnabled(false);
 	}
 
 }

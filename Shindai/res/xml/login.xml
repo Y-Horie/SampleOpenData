@@ -40,6 +40,13 @@
          android:entryValues="@array/num_entry2"
          android:dialogTitle="表示させるデータ数" />
 
+    <!-- データの自動取得をする稼働亜 -->
+    <CheckBoxPreference
+    	android:key="autocheck"
+    	android:title="新着情報の自動取得"
+    	android:summary="チェックボックスサマリー"
+    />
+
 
   </PreferenceCategory>
 

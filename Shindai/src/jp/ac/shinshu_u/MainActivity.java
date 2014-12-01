@@ -1,10 +1,12 @@
 /*
  * ◎変更点
- * ※日付選択のところ
- * 指定日有り→無しの際、表示されていた日付が消えるように修正
- * 表示される日付の文字列を修正
- * 部局スピナ―をenumに
- * SetConstantをString,Intからenumへ変更し、それに伴った修正
+ * 新しい機能の実装：
+ * アップデートを自動で確認可能に
+ * アップデートの自動確認を行うかの選択
+ *
+ * その他、見えてはいけないところが出ていたので修正
+ * IDの取得専用のクラスの作成：GetSessionIdTask.java
+ *
  *
  * 基本的にprivate
  * 他のクラスから見たい場合は、get◎◎を作る←これはpublic
@@ -49,7 +51,6 @@ public class MainActivity extends Activity {
 
 	static String param_g;
 	static String param_p;
-
 	static String param;
 	static int day;
 
@@ -63,6 +64,7 @@ public class MainActivity extends Activity {
 	DatePickerDialog datePickerDialog;
 
 	private Button getSessionIdButton;
+	private Button test;
 	private Button setStartButton;
 	private Button setEndButton;
 
@@ -89,6 +91,21 @@ public class MainActivity extends Activity {
 		// 部局については書き替えが出来るようにCodelistactivity内で管理
 		Spinner s1 = (Spinner) findViewById(R.id.bukyoku);
 		s1.setAdapter(a1);
+
+		//更新データの有無を取得するかを取得する
+		SharedPreferences pr = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean param_AC = pr.getBoolean("autocheck", false); //初期値は5
+
+		//自動取得
+		if(param_AC == true ){
+			//テスト
+			String g = getParam_g();
+			String p = getParam_p();
+			String p_day = getPrevDay();
+
+			GetNewData newdata = new GetNewData(getApplicationContext(), g, p, p_day);
+			newdata.execute();
+		}
 
 		// 非同期処理
 		login = (TextView) findViewById(R.id.login);
@@ -132,6 +149,8 @@ public class MainActivity extends Activity {
 			}
 		});
 	}
+
+
 
 	// メニュー作成
 	@Override
@@ -228,6 +247,22 @@ public class MainActivity extends Activity {
 		Spinner sp = (Spinner)findViewById(R.id.bukyoku);
 		item = (CodeList)sp.getSelectedItem();
 		return item;
+	}
+
+	private String getPrevDay(){
+		//ついでに起動時間の事
+		String p_day;
+		String str ="";
+		try{
+			Context ctxt = createPackageContext("jp.ac.shinshu_u",0);
+			SharedPreferences pref1 =
+					ctxt.getSharedPreferences("data",MODE_PRIVATE);
+			str = pref1.getString("data",null);
+		}catch (NameNotFoundException e){
+			e.printStackTrace();
+		}
+		p_day = str.toString();
+		return p_day;
 	}
 
 	// 最新更新日取得用、アプリ起動時間取得
@@ -372,7 +407,7 @@ public class MainActivity extends Activity {
 	}
 
 	//追加
-/*
+	/*
 	private void setMoji(){
 		// データ取得に必要な変数の定義
 		String g = getParam_g();
@@ -381,5 +416,5 @@ public class MainActivity extends Activity {
 		int n = getParam_n();
 
 	}
-*/
+	 */
 }

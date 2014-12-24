@@ -30,19 +30,27 @@ public class GetSessionIdTask {
 			response = httpClient.execute(httpGet, localContext);
 			br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 			String line;
+			String condition;
 			String hogehoge;
-			while ((line = br.readLine()) != null) {
+
+			if ((line = br.readLine()) != null) {
 				// カンマで分割するなら下記を参考に実装してください．
 				// カラムの数でハードコーディングしない方がいいと思う
 				String[] RowData = line.split(",");
-				//hoge = RowData[0];
-				hogehoge = RowData[1];
+				condition = RowData[0]; //SUCSEES or FAIL
+				hogehoge = RowData[1];  //sessionId
 
-				//グッバイ""
-				hogehoge = hogehoge.substring(1, hogehoge.length()-1);
+				if(!condition.equals("\"FAIL\"")){
+					//グッバイ""
+					hogehoge = hogehoge.substring(1, hogehoge.length()-1);
+					// 今はサンプルなので+にしてるが，文字列の結合はStringBuilder推奨
+					sessionId = sessionId + hogehoge;
+				}else{
+					sessionId = "error";
+				}
 
-				// 今はサンプルなので+にしてるが，文字列の結合はStringBuilder推奨
-				sessionId = sessionId + hogehoge;
+			}else{
+				sessionId = "error";
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -54,7 +62,6 @@ public class GetSessionIdTask {
 			}
 		}
 		// 今はサンプルなので+にしてるが，文字列の結合はStringBuilder推奨
-		//return sessionId;
 		return sessionId;
 	}
 }

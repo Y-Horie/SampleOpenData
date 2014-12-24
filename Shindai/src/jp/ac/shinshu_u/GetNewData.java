@@ -15,30 +15,37 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class GetNewData extends AsyncTask<String, String, String>{
 
+	private TextView text;
 	private String g;
 	private String p;
 	private String p_day;
+	private String n_day;
 
 	Toast toast;
 	String hoge;
 	Context context;
 	SystemInteger update_s;
 
-	public GetNewData(Context context, String g, String p, String p_day) {
+	public GetNewData(TextView text, Context context, String g, String p, String p_day, String n_day) {
 		super();
+		this.text = text;
 		this.context = context;
 		this.g = g; //学籍番号
 		this.p = p; //パスワード
 		this.p_day = p_day;
+		this.n_day = n_day;
 	}
 
 	@Override
 	protected String doInBackground(String... params) {
+		//最終確認日が今日かどうか
 		String s = GetSessionIdTask.getSessionId(g, p); //aの戻り値＝セッションID
 
 		StringBuilder buf = new StringBuilder();
@@ -65,14 +72,20 @@ public class GetNewData extends AsyncTask<String, String, String>{
 			response = httpClient.execute(httpGet, localContext);
 			br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "Shift-JIS"));
 			String line;
-			line = br.readLine();
-				if((line = br.readLine()) != null){
-					hoge = "新着あり";
-					update_s = SystemInteger.ari;
+			line = br.readLine(); //一行目は読み飛ばす
+			if((line = br.readLine()) != null){
+				if(n_day.equals(p_day)){
+					hoge = "追加の情報があります";
+					update_s = SystemInteger.on;
 				}else{
-					hoge = "新着なし";
-					update_s = SystemInteger.nashi;
+					hoge = "追加の情報はありません";
+					update_s = SystemInteger.off;
 				}
+			}else{
+				//もし、最終確認日が今日だったら
+				hoge = "追加の情報はありません";
+				update_s = SystemInteger.off;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -88,17 +101,11 @@ public class GetNewData extends AsyncTask<String, String, String>{
 	//新着情報の有無の表示
 	@Override
 	protected void onPostExecute(String hoge) {
-		switch(update_s){
-		case ari:
-			toast = Toast.makeText(context, hoge, Toast.LENGTH_LONG);
-	        toast.show();
-			break;
-		case nashi:
-			toast = Toast.makeText(context, hoge, Toast.LENGTH_LONG);
-	        toast.show();
-			break;
-		default:
-			break;
+		text.setText(hoge);
+		if(update_s == SystemInteger.on){
+			text.setTextColor(Color.RED);
 		}
+		//toast = Toast.makeText(context, hoge, Toast.LENGTH_LONG);
+		//toast.show();
 	};
 }

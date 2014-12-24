@@ -12,8 +12,7 @@
     <TextView
         android:id="@+id/text5"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/main_text" />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/gakuseki"
@@ -91,6 +90,11 @@
             android:layout_height="wrap_content"/>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/login"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
     <Button
         android:id="@+id/get_session_id_button"
         android:layout_width="fill_parent"
@@ -99,9 +103,5 @@
         android:layout_alignParentLeft="true"
         android:text="@string/but_send"/>
 
-    <TextView
-        android:id="@+id/login"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
 </LinearLayout>
 </ScrollView>

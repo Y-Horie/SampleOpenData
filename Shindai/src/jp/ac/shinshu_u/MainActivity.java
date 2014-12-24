@@ -6,6 +6,7 @@
  *
  * その他、見えてはいけないところが出ていたので修正
  * IDの取得専用のクラスの作成：GetSessionIdTask.java
+ * 新着情報の有無を取得するためのクラスの作成:GetNewData
  *
  *
  * 基本的にprivate
@@ -19,6 +20,7 @@
 package jp.ac.shinshu_u;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -49,14 +51,16 @@ public class MainActivity extends Activity {
 	TextView login;
 	TextView setday;
 
-	static String param_g;
-	static String param_p;
-	static String param;
-	static int day;
+	private String param_g;
+	private String param_p;
+	private String param;
+	private int day;
+	private int putCount;
 
 	SystemInteger start_s;
 	SystemInteger end_s;
 	SystemInteger attention;
+	SystemInteger ATcondition;
 
 	String start;
 	String end;
@@ -64,9 +68,12 @@ public class MainActivity extends Activity {
 	DatePickerDialog datePickerDialog;
 
 	private Button getSessionIdButton;
-	private Button test;
 	private Button setStartButton;
 	private Button setEndButton;
+
+	int i = 0;
+
+	static ArrayList<String> array = new ArrayList<String>();
 
 	//変数の定義
 	SetCodelist moe = new SetCodelist();
@@ -77,6 +84,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		// こんにちは○○さんを表示
+		ATcondition = SystemInteger.off;
 		setTxt();
 		setDay();
 
@@ -99,11 +107,16 @@ public class MainActivity extends Activity {
 		//自動取得
 		if(param_AC == true ){
 			//テスト
+			TextView newdata_text = (TextView)findViewById(R.id.text5);
 			String g = getParam_g();
 			String p = getParam_p();
 			String p_day = getPrevDay();
+			Date date1 = new Date();
 
-			GetNewData newdata = new GetNewData(getApplicationContext(), g, p, p_day);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd",Locale.JAPANESE);
+			String n_day = sdf.format(date1).toString();
+
+			GetNewData newdata = new GetNewData(newdata_text ,getApplicationContext(), g, p, p_day, n_day);
 			newdata.execute();
 		}
 
@@ -115,37 +128,64 @@ public class MainActivity extends Activity {
 		getSessionIdButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				((Button)v).setEnabled(false);
-
-				// データ取得に必要な変数の定義
-				String g = getParam_g();
-				String p = getParam_p();
-				CodeList b = getItem();
+				//((Button)v).setEnabled(false);
+				getSessionIdButton.setText("続きを表示");
+				login.setText(null);
 				int n = getParam_n();
+				int allData;
 
-				// 日にちの指定がなかった時の処理
-				if(start_s == SystemInteger.off){
-					start = null;
+				if(ATcondition == SystemInteger.off){
+					// データ取得に必要な変数の定義
+					String g = getParam_g();
+					String p = getParam_p();
+					CodeList b = getItem();
+
+					// 日にちの指定がなかった時の処理
+					if(start_s == SystemInteger.off){
+						start = null;
+					}
+					if(end_s == SystemInteger.off){
+						end = null;
+					}
+
+					// 名称をコードへ変換
+					String b_ = b.name();
+
+					//デバッグ用
+					//gakuseki = (TextView)findViewById(R.id.gakuseki);
+					//gakuseki.setText("st:" + start + "ed:" + end + "\n\n");
+
+					// 最後にデータを取得した時のこと
+					SaveStartTime();
+
+					final GetSessionIdAsyncTask getSessionIdAsyncTask =
+							new GetSessionIdAsyncTask(login, g, p, b_, n, start, end);
+
+					// 非同期処理を開始する
+					getSessionIdAsyncTask.execute("");
+					ATcondition = SystemInteger.on;
+					putCount = 0;
+
+				}else{
+					/*
+					for(int j =  0; putCount < array.size(); j++){
+						if(j < n){
+							login.setText(array.get(putCount));
+							putCount++;
+						}else{
+							break;
+							//login.setText("以上です。残り"+(array.size()-putCount)+"件");
+						}
+					}
+					*/
+					//if(putCount >= array.size()){
+					//	login.setText("以上です。");
+					//}else{
+					//	arr.append("以上です。残り"+(array.size()-putCount)+"件");
+					//	login.setText(arr.toString());
+					//}
+
 				}
-				if(end_s == SystemInteger.off){
-					end = null;
-				}
-
-				// 名称をコードへ変換
-				String b_ = b.name();
-
-				//デバッグ用
-				//gakuseki = (TextView)findViewById(R.id.gakuseki);
-				//gakuseki.setText("st:" + start + "ed:" + end + "\n\n");
-
-				// 最後にデータを取得した時のこと
-				SaveStartTime();
-
-				final GetSessionIdAsyncTask getSessionIdAsyncTask =
-						new GetSessionIdAsyncTask(login, g, p, b_, n, start, end);
-
-				// 非同期処理を開始する
-				getSessionIdAsyncTask.execute("");
 			}
 		});
 	}
@@ -407,14 +447,4 @@ public class MainActivity extends Activity {
 	}
 
 	//追加
-	/*
-	private void setMoji(){
-		// データ取得に必要な変数の定義
-		String g = getParam_g();
-		String p = getParam_p();
-		String b = getItem();
-		int n = getParam_n();
-
-	}
-	 */
 }

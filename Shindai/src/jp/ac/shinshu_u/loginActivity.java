@@ -28,24 +28,4 @@ public class loginActivity extends Activity {
 
 		return uri;
 	}
-
-	//セッションIDをくっつける処理（使ってない）
-	public static String comSession(String s){
-
-		StringBuilder buf = new StringBuilder();
-		SetConstant moe = new SetConstant();
-		String uri;
-
-		buf.append(LoginStrings.https);
-		//今扱っているのが休講情報のみなので、ここは_kyuukouで固定
-		//今後、他のデータも扱えるようになったら適宜変更
-		buf.append(LoginStrings.kyuukou);
-		buf.append(LoginStrings.session);
-		buf.append(s);
-
-		uri = buf.toString();
-
-		return uri;
-	}
-
 }

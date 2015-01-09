@@ -45,14 +45,61 @@ public class GetNewData extends AsyncTask<String, String, String>{
 
 	@Override
 	protected String doInBackground(String... params) {
+		String sessionId = "error";
+		String uri = loginActivity.setSession(g, p);
+		HttpClient httpClient = new DefaultHttpClient();
+		HttpContext localContext = new BasicHttpContext();
+		HttpGet httpGet = new HttpGet(uri);
+		HttpResponse response = null;
+		BufferedReader br = null;
+
+		try {
+			response = httpClient.execute(httpGet, localContext);
+			br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			String line;
+			String condition;
+			String hogehoge;
+
+			if ((line = br.readLine()) != null) {
+				// カンマで分割するなら下記を参考に実装してください．
+				// カラムの数でハードコーディングしない方がいいと思う
+				String[] RowData = line.split(",");
+				condition = RowData[0]; //SUCSEES or FAIL
+				hogehoge = RowData[1];  //sessionId
+				if(!condition.equals("\"FAIL\"")){
+					// ダブルクオーテーションを削除
+					hogehoge = hogehoge.substring(1, hogehoge.length()-1);
+					//セッションIDのみを代入
+					sessionId = hogehoge;
+					// データの取得
+					sessionId = getInfo(sessionId);
+				}else{
+					sessionId += "　学籍番号とパスワードを確認してください";
+				}
+			}else{
+				sessionId = "error";
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return params[0] + sessionId;
+	};
+
+	private String getInfo(String sessionId){
 		//最終確認日が今日かどうか
-		String s = GetSessionIdTask.getSessionId(g, p); //aの戻り値＝セッションID
+		//aの戻り値＝セッションID
 
 		StringBuilder buf = new StringBuilder();
 		buf.append(LoginStrings.https);
 		buf.append(LoginStrings.kyuukou);
 		buf.append(LoginStrings.session);
-		buf.append(s);
+		buf.append(sessionId);
 
 		if(p_day != null){
 			buf.append(LoginStrings.update);
@@ -74,15 +121,17 @@ public class GetNewData extends AsyncTask<String, String, String>{
 			String line;
 			line = br.readLine(); //一行目は読み飛ばす
 			if((line = br.readLine()) != null){
-				if(n_day.equals(p_day)){
+				if(!n_day.equals(p_day)){
+					// 今日の日付 != 前の日付なら
 					hoge = "追加の情報があります";
 					update_s = SystemInteger.on;
 				}else{
+					// 今日の日付 == 前の日付
 					hoge = "追加の情報はありません";
 					update_s = SystemInteger.off;
 				}
 			}else{
-				//もし、最終確認日が今日だったら
+				// データの取得が上手く行えなかったら
 				hoge = "追加の情報はありません";
 				update_s = SystemInteger.off;
 			}
@@ -96,16 +145,14 @@ public class GetNewData extends AsyncTask<String, String, String>{
 			}
 		}
 		return hoge;
-	};
+	}
 
 	//新着情報の有無の表示
 	@Override
-	protected void onPostExecute(String hoge) {
-		text.setText(hoge);
+	protected void onPostExecute(String sessionId) {
+		text.setText(sessionId);
 		if(update_s == SystemInteger.on){
 			text.setTextColor(Color.RED);
 		}
-		//toast = Toast.makeText(context, hoge, Toast.LENGTH_LONG);
-		//toast.show();
 	};
 }

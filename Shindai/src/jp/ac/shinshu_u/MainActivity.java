@@ -1,12 +1,5 @@
 /*
  * ◎変更点
- * 新しい機能の実装：
- * アップデートを自動で確認可能に
- * アップデートの自動確認を行うかの選択
- *
- * その他、見えてはいけないところが出ていたので修正
- * IDの取得専用のクラスの作成：GetSessionIdTask.java
- * 新着情報の有無を取得するためのクラスの作成:GetNewData
  *
  *
  * 基本的にprivate
@@ -29,6 +22,7 @@ import jp.ac.shinshu_u.SetCodelist.CodeList;
 import jp.ac.shinshu_u.SetConstant.SystemInteger;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -54,7 +48,8 @@ public class MainActivity extends Activity {
 	private String param_g;
 	private String param_p;
 	private String param;
-	private int day;
+	private String g;
+	private String p;
 	private int putCount;
 
 	SystemInteger start_s;
@@ -72,6 +67,7 @@ public class MainActivity extends Activity {
 	private Button setEndButton;
 
 	int i = 0;
+	private ProgressDialog progressDialog;
 
 	static ArrayList<String> array = new ArrayList<String>();
 
@@ -84,7 +80,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		// こんにちは○○さんを表示
-		ATcondition = SystemInteger.off;
+		ATcondition = SystemInteger.off; //ボタンを押したかどうか
 		setTxt();
 		setDay();
 
@@ -102,22 +98,29 @@ public class MainActivity extends Activity {
 
 		//更新データの有無を取得するかを取得する
 		SharedPreferences pr = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean param_AC = pr.getBoolean("autocheck", false); //初期値は5
+		boolean param_AC = pr.getBoolean("autocheck", false); //初期値は「確認しない」
+
+		//学籍番号とパスワードを取得
+		g = getParam_g();
+		p = getParam_p();
+
+		//処理の状態を明示する
+		progressDialog = new ProgressDialog(this);
 
 		//自動取得
-		if(param_AC == true ){
-			//テスト
+		if(param_AC == true &&
+				(!g.equals("Unselected")) || (!p.equals("Unselected"))){
 			TextView newdata_text = (TextView)findViewById(R.id.text5);
-			String g = getParam_g();
-			String p = getParam_p();
 			String p_day = getPrevDay();
 			Date date1 = new Date();
 
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd",Locale.JAPANESE);
 			String n_day = sdf.format(date1).toString();
 
-			GetNewData newdata = new GetNewData(newdata_text ,getApplicationContext(), g, p, p_day, n_day);
-			newdata.execute();
+			newdata_text.setText("更新データの有無を取得中...");
+
+			GetNewData newdata = new GetNewData(newdata_text, getApplicationContext(), g, p, p_day, n_day);
+			newdata.execute("");
 		}
 
 		// 非同期処理
@@ -128,16 +131,26 @@ public class MainActivity extends Activity {
 		getSessionIdButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//((Button)v).setEnabled(false);
-				getSessionIdButton.setText("続きを表示");
-				login.setText(null);
+				// 一回で表示するデータの個数
 				int n = getParam_n();
-				int allData;
 
+				// 初めてボタンを押した時
 				if(ATcondition == SystemInteger.off){
+					// ボタンの文字を変更
+					getSessionIdButton.setText("続きを表示");
+
+					//学籍番号とパスワードを取得
+					g = getParam_g();
+					p = getParam_p();
+					// 非同期処理中であることを示すダイアログの表示
+					// 非表示にするのは非同期処理で行う
+					progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+					progressDialog.setMessage("しばらくお待ちください");
+					progressDialog.setCancelable(true);
+					progressDialog.show();
+
+
 					// データ取得に必要な変数の定義
-					String g = getParam_g();
-					String p = getParam_p();
 					CodeList b = getItem();
 
 					// 日にちの指定がなかった時の処理
@@ -151,46 +164,41 @@ public class MainActivity extends Activity {
 					// 名称をコードへ変換
 					String b_ = b.name();
 
-					//デバッグ用
-					//gakuseki = (TextView)findViewById(R.id.gakuseki);
-					//gakuseki.setText("st:" + start + "ed:" + end + "\n\n");
-
 					// 最後にデータを取得した時のこと
 					SaveStartTime();
 
 					final GetSessionIdAsyncTask getSessionIdAsyncTask =
-							new GetSessionIdAsyncTask(login, g, p, b_, n, start, end);
+							new GetSessionIdAsyncTask(login, g, p, b_, n,
+									start, end, progressDialog, getPrevDay(), getStateData());
 
 					// 非同期処理を開始する
 					getSessionIdAsyncTask.execute("");
 					ATcondition = SystemInteger.on;
 					putCount = 0;
 
+					//取得したデータがある場合は
 				}else{
-					/*
-					for(int j =  0; putCount < array.size(); j++){
-						if(j < n){
-							login.setText(array.get(putCount));
-							putCount++;
-						}else{
-							break;
-							//login.setText("以上です。残り"+(array.size()-putCount)+"件");
+					if(array.size() != 0){
+						for(int j =  0; putCount < array.size(); j++){
+							if(j < n){
+								login.setText(array.get(putCount));
+								putCount++;
+								progressDialog.dismiss();
+							}else{
+								login.append("以上です。残り"+(array.size()-putCount)+"件");
+								break;
+							}
 						}
 					}
-					*/
-					//if(putCount >= array.size()){
-					//	login.setText("以上です。");
-					//}else{
-					//	arr.append("以上です。残り"+(array.size()-putCount)+"件");
-					//	login.setText(arr.toString());
-					//}
-
+					//全てのデータを表示し終えた後、表示される
+					if(putCount >= array.size() || array.size() == 0){
+						getSessionIdButton.setVisibility(View.INVISIBLE);
+						login.append("以上です");
+					}
 				}
 			}
 		});
 	}
-
-
 
 	// メニュー作成
 	@Override
@@ -218,11 +226,11 @@ public class MainActivity extends Activity {
 			// メニュー２選択時の処理（設定）
 			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.SettingActivity");
 			startActivity(intent);
-			this.finish();
 			return true;
 		case R.id.menu3:
 			//各項目についての説明のページへ飛ばす
-			this.finish();
+			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.Help");
+			startActivity(intent);
 			break;
 		case R.id.menu4:
 			//プログラムの終了
@@ -279,6 +287,12 @@ public class MainActivity extends Activity {
 		param = p.getString("put_num", "5"); //初期値は5
 		int num = Integer.parseInt(param);
 		return num;
+	}
+
+	private boolean getStateData(){
+		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean paramData = p.getBoolean("shinchaku", true); //初期値は「最新のデータのみ」
+		return paramData;
 	}
 
 	// 範囲の指定（Spinnerの値取得）　部局
@@ -445,6 +459,4 @@ public class MainActivity extends Activity {
 		// 日付設定ダイアログの表示
 		datePickerDialog.show();
 	}
-
-	//追加
 }

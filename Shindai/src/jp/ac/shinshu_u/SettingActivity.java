@@ -9,6 +9,8 @@ import android.preference.ListPreference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -20,6 +22,9 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 	private EditTextPreference edittext;
 	private CheckBoxPreference checkbox;
 	private CheckBoxPreference AutoCheck;
+	private CheckBoxPreference shinchaku;
+
+	private Button button;
 
 	@Override
 	public void onCreate(Bundle bundle) {
@@ -29,11 +34,15 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 		setContentView(R.layout.loginface);
 		addPreferencesFromResource(R.xml.login); //バージョンで分ける
 
+		button = (Button)findViewById(R.id.button);
+		button.setText("設 定 完 了");
+
 		// Preferenceの取得
 		list = (ListPreference)findPreference("put_num");
 		edittext = (EditTextPreference)findPreference("edittext");
 		checkbox = (CheckBoxPreference)findPreference("savePass");
 		AutoCheck = (CheckBoxPreference)findPreference("autocheck");
+		shinchaku = (CheckBoxPreference)findPreference("shinchaku");
 
 
 		// リスナーを設定する
@@ -51,12 +60,14 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 		String param_edittext = p.getString("edittext", "Unselected");
 		boolean param_checkbox = p.getBoolean("savePass", false);
 		boolean param_AutoCheck = p.getBoolean("autocheck", false);
+		boolean param_shinchaku = p.getBoolean("shinchaku", true);
 
 		// デフォルト値の設定
 		list.setDefaultValue(param_list);
 		edittext.setDefaultValue(param_edittext);
 		checkbox.setDefaultValue(param_checkbox);
 		AutoCheck.setDefaultValue(param_AutoCheck);
+		AutoCheck.setDefaultValue(param_shinchaku);
 
 		// サマリーの設定
 		setSummary(list, param_list);
@@ -142,11 +153,13 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 		edittext.setOnPreferenceChangeListener(null);
 		checkbox.setOnPreferenceChangeListener(null);
 		AutoCheck.setOnPreferenceChangeListener(null);
+		shinchaku.setOnPreferenceChangeListener(null);
 
 		list = null;
 		edittext = null;
 		checkbox = null;
 		AutoCheck = null;
+		shinchaku = null;
 	}
 
 	// Activityの再開時に実行
@@ -156,6 +169,7 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 		edittext.setEnabled(true);
 		checkbox.setEnabled(true);
 		AutoCheck.setEnabled(true);
+		shinchaku.setEnabled(true);
 	}
 
 	// Activityの停止時に実行
@@ -165,6 +179,47 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 		edittext.setEnabled(false);
 		checkbox.setEnabled(false);
 		AutoCheck.setEnabled(false);
+		shinchaku.setEnabled(false);
+	}
+
+	// メニュー作成
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(R.menu.menu, menu);
+
+		return true;
+	}
+
+	// メニューアイテム選択イベント
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent intent = new Intent();
+
+		switch (item.getItemId()) {
+		case R.id.menu1:
+			// メニュー１選択時の処理（更新）
+			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.MainActivity");
+			startActivity(intent);
+			this.finish();
+			break;
+
+		case R.id.menu2:
+			// メニュー２選択時の処理（設定）
+			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.SettingActivity");
+			startActivity(intent);
+			return true;
+		case R.id.menu3:
+			//各項目についての説明のページへ飛ばす
+			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.Help");
+			startActivity(intent);
+			break;
+		case R.id.menu4:
+			//プログラムの終了
+			this.finish();
+			break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 }

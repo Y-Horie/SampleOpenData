@@ -203,7 +203,6 @@ public class SettingActivity extends PreferenceActivity implements OnPreferenceC
 			startActivity(intent);
 			this.finish();
 			break;
-
 		case R.id.menu2:
 			// メニュー２選択時の処理（設定）
 			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.SettingActivity");

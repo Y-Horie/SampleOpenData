@@ -15,6 +15,7 @@ import org.apache.http.protocol.HttpContext;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
@@ -29,6 +30,8 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 	private ProgressDialog progressDialog;
 	private String p_day;
 	private boolean ds;
+	private Button button;
+	private int c = 0;
 
 	public GetSessionIdAsyncTask(TextView textView, String g, String p, String b, int n,
 			String st, String ed, ProgressDialog pD, String p_day, boolean data) {
@@ -43,6 +46,7 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 		this.progressDialog = pD; //グルグルを表示させる
 		this.p_day = p_day;
 		this.ds = data;
+		this.button = button;
 	}
 
 	@Override
@@ -148,7 +152,6 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 		BufferedReader br = null;
 
 		int i = 0;
-		int c = 0;
 
 		try {
 			response = httpClient.execute(httpGet, localContext);
@@ -162,73 +165,61 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 					// カンマで分割するなら下記を参考に実装してください．
 					// カラムの数でハードコーディングしない方がいいと思う
 					String[] RowData = line.split(",");
-					kyuukou.append("開講年度");
-					kyuukou.append(RowData[0]);
-					kyuukou.append(",");
-					kyuukou.append("開講部局");
-					kyuukou.append(RowData[3]);
+					kyuukou.append(RowData[3]); //開講部局
+					kyuukou.append("「");
+					kyuukou.append(RowData[6]); //講義名
+					kyuukou.append("」");
 					kyuukou.append("\n");
-					kyuukou.append("講義名");
-					kyuukou.append(RowData[6]);
-					kyuukou.append("\n");
-					kyuukou.append("開講場所");
-					kyuukou.append(RowData[11]);
-					kyuukou.append(",");
-					kyuukou.append("区分");
-					kyuukou.append(RowData[14]);
-					kyuukou.append("\n");
-					kyuukou.append("休講日");
+					kyuukou.append("休講日：");
 					kyuukou.append(RowData[15]);
-					kyuukou.append(",");
-					kyuukou.append("講義場所");
+					kyuukou.append("\n");
+					kyuukou.append("講義室：");
 					kyuukou.append(RowData[16]);
-					kyuukou.append(",");
+					kyuukou.append("　");
+					kyuukou.append(RowData[17]); //コマ数
 					kyuukou.append("時限");
-					kyuukou.append(RowData[17]);
 					kyuukou.append("\n");
-					kyuukou.append("連絡事項");
-					kyuukou.append(RowData[18]);
+					kyuukou.append(RowData[0]); //開講年度
+					kyuukou.append("年度");
+					kyuukou.append(RowData[14]); //開講区分
 					kyuukou.append("\n");
-					kyuukou.append("登録日");
-					kyuukou.append(RowData[19]);
-					kyuukou.append(",");
-					kyuukou.append("更新日");
+					//連絡事項が無ければ読み飛ばす
+					if(!RowData[18].equals("\"\"")){
+						kyuukou.append("連絡事項：");
+						kyuukou.append(RowData[18]);
+						kyuukou.append("\n");
+					}
+					kyuukou.append("更新日：");
 					kyuukou.append(RowData[20]);
 					kyuukou.append("\n\n");
 					i++;
 				}else{
 					String[] RowData = line.split(",");
-					data.append("開講年度");
-					data.append(RowData[0]);
-					data.append(",");
-					data.append("開講部局");
-					data.append(RowData[3]);
+					data.append(RowData[3]); //開講部局
+					data.append("「");
+					data.append(RowData[6]); //講義名
+					data.append("」");
 					data.append("\n");
-					data.append("講義名");
-					data.append(RowData[6]);
-					data.append("\n");
-					data.append("開講場所");
-					data.append(RowData[11]);
-					data.append(",");
-					data.append("区分");
-					data.append(RowData[14]);
-					data.append("\n");
-					data.append("休講日");
+					data.append("休講日：");
 					data.append(RowData[15]);
-					data.append(",");
-					data.append("講義場所");
+					data.append("\n");
+					data.append("講義室：");
 					data.append(RowData[16]);
-					data.append(",");
+					data.append("　");
+					data.append(RowData[17]); //コマ数
 					data.append("時限");
-					data.append(RowData[17]);
 					data.append("\n");
-					data.append("連絡事項");
-					data.append(RowData[18]);
+					data.append(RowData[0]); //開講年度
+					data.append("年度");
+					data.append(RowData[14]); //開講区分
 					data.append("\n");
-					data.append("登録日");
-					data.append(RowData[19]);
-					data.append(",");
-					data.append("更新日");
+					//連絡事項が無ければ読み飛ばす
+					if(!RowData[18].equals("\"\"")){
+						data.append("連絡事項：");
+						data.append(RowData[18]);
+						data.append("\n");
+					}
+					data.append("更新日：");
 					data.append(RowData[20]);
 					data.append("\n\n");
 					MainActivity.array.add(data.toString());
@@ -246,9 +237,12 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 			}
 		}
 		kyuukou.append("以上です\n");
-		//表示させていない者がある場合のみ、以下を表示
 		if(c != 0){
+			//表示させていない物がある場合のみ、以下～を表示
 			kyuukou.append("残り"+c+"件\n");
+		}else{
+			// 繰り返して取得された時用の処理
+			MainActivity.array.clear();
 		}
 
 		// 今はサンプルなので+にしてるが，文字列の結合はStringBuilder推奨

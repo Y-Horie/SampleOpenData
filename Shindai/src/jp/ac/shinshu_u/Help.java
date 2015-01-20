@@ -62,7 +62,6 @@ public class Help extends Activity{
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		getMenuInflater().inflate(R.menu.menu, menu);
-
 		return true;
 	}
 
@@ -78,7 +77,6 @@ public class Help extends Activity{
 			startActivity(intent);
 			this.finish();
 			break;
-
 		case R.id.menu2:
 			// メニュー２選択時の処理（設定）
 			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.SettingActivity");

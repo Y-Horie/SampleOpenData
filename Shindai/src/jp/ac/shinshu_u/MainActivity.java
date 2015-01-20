@@ -50,6 +50,7 @@ public class MainActivity extends Activity {
 	private String param;
 	private String g;
 	private String p;
+	private int n;
 	private int putCount;
 
 	SystemInteger start_s;
@@ -67,6 +68,10 @@ public class MainActivity extends Activity {
 	private Button setEndButton;
 
 	int i = 0;
+	private int sMonth = 0;
+	private int eMonth = 0;
+	private int sDay = 0;
+	private int eDay = 0;
 	private ProgressDialog progressDialog;
 
 	static ArrayList<String> array = new ArrayList<String>();
@@ -103,6 +108,8 @@ public class MainActivity extends Activity {
 		//学籍番号とパスワードを取得
 		g = getParam_g();
 		p = getParam_p();
+		// 一回で表示するデータの個数
+		n = getParam_n();
 
 		//処理の状態を明示する
 		progressDialog = new ProgressDialog(this);
@@ -131,8 +138,6 @@ public class MainActivity extends Activity {
 		getSessionIdButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// 一回で表示するデータの個数
-				int n = getParam_n();
 
 				// 初めてボタンを押した時
 				if(ATcondition == SystemInteger.off){
@@ -173,6 +178,7 @@ public class MainActivity extends Activity {
 
 					// 非同期処理を開始する
 					getSessionIdAsyncTask.execute("");
+
 					ATcondition = SystemInteger.on;
 					putCount = 0;
 
@@ -191,13 +197,26 @@ public class MainActivity extends Activity {
 						}
 					}
 					//全てのデータを表示し終えた後、表示される
-					if(putCount >= array.size() || array.size() == 0){
+					if(array.size() == 0){
+						getSessionIdButton.setVisibility(View.INVISIBLE);
+					}else if(putCount >= array.size()){
 						getSessionIdButton.setVisibility(View.INVISIBLE);
 						login.append("以上です");
 					}
 				}
 			}
 		});
+	}
+
+	// MainActivityの再起動
+	public void reload() {
+		Intent intent = getIntent();
+		overridePendingTransition(0, 0);
+		intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+		finish();
+
+		overridePendingTransition(0, 0);
+		startActivity(intent);
 	}
 
 	// メニュー作成
@@ -217,11 +236,8 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.menu1:
 			// メニュー１選択時の処理（更新）
-			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.MainActivity");
-			startActivity(intent);
-			this.finish();
+			reload();
 			break;
-
 		case R.id.menu2:
 			// メニュー２選択時の処理（設定）
 			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.SettingActivity");
@@ -263,9 +279,6 @@ public class MainActivity extends Activity {
 				+ "前回の起動：" + text_r + "\n\n");
 	}
 
-	// ここから（可能であれば）改良したいエリア -------------------------------------------
-	// Spinnerの値取得をcodelistActivity内, Preferencesの値取得をloginActivity内で行いたい
-	// 値が上手く渡せなかったのでとりあえずMain内で読み込んで対処中
 	// 学籍番号
 	private String getParam_g(){
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
@@ -289,13 +302,14 @@ public class MainActivity extends Activity {
 		return num;
 	}
 
+	// 最新情報があるかを取得するか否か
 	private boolean getStateData(){
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean paramData = p.getBoolean("shinchaku", true); //初期値は「最新のデータのみ」
 		return paramData;
 	}
 
-	// 範囲の指定（Spinnerの値取得）　部局
+	// 部局
 	private CodeList getItem(){
 		CodeList item;
 		Spinner sp = (Spinner)findViewById(R.id.bukyoku);
@@ -303,6 +317,7 @@ public class MainActivity extends Activity {
 		return item;
 	}
 
+	// 前回のデータ取得日時を取得
 	private String getPrevDay(){
 		//ついでに起動時間の事
 		String p_day;
@@ -348,31 +363,51 @@ public class MainActivity extends Activity {
 	DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
 		public void onDateSet(android.widget.DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
 			StringBuffer day = new StringBuffer();
-
 			monthOfYear++;
 			day.append(year + "/");
-			day.append(monthOfYear + "/");
-			day.append(dayOfMonth);
+			day.append(changeDay(monthOfYear) + "/");
+			day.append(changeDay(dayOfMonth));
 
 			//日付を格納する変数を場合分け
 			switch(attention){
 			case a_start:
-				start = day.toString();
 				//確認用メッセージ
+				sMonth = monthOfYear;
+				sDay = dayOfMonth;
 				setday = (TextView)findViewById(R.id.start_st);
-				setday.setText(start);
+				if(eMonth != 0 && (sMonth > eMonth || sDay > eDay)){
+					setday.setText("正しい開始日を指定してください");
+				}else{
+					start = day.toString();
+					setday.setText(start);
+				}
 				break;
 			case a_end:
-				end = day.toString();
 				//確認用メッセージ
+				eMonth = monthOfYear;
+				eDay = dayOfMonth;
 				setday = (TextView)findViewById(R.id.end_st);
-				setday.setText(end);
+				if(sMonth != 0 && (sMonth > eMonth || sDay > eDay)){
+					setday.setText("正しい終了日を指定してください");
+				}else{
+					end = day.toString();
+					setday.setText(end);
+				}
 				break;
 			default:
 				break;
 			}
 		}
 	};
+
+	//1桁の月日を2桁に変換する
+	private String changeDay(int n){
+		if(n < 10){
+			return "0" + n;
+		}else{
+			return String.valueOf(n);
+		}
+	}
 
 	// 開始・終了日の取得
 	private void setDay(){

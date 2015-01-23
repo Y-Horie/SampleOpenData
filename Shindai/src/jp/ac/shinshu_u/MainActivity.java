@@ -30,7 +30,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -172,12 +171,15 @@ public class MainActivity extends Activity {
 					// 最後にデータを取得した時のこと
 					SaveStartTime();
 
-					final GetSessionIdAsyncTask getSessionIdAsyncTask =
+					GetSessionIdAsyncTask getSessionIdAsyncTask =
 							new GetSessionIdAsyncTask(login, g, p, b_, n,
 									start, end, progressDialog, getPrevDay(), getStateData());
 
 					// 非同期処理を開始する
 					getSessionIdAsyncTask.execute("");
+
+					// データを取得後、非同期処理用インスタンスを破棄（再取得の為）
+					getSessionIdAsyncTask = null;
 
 					ATcondition = SystemInteger.on;
 					putCount = 0;
@@ -196,13 +198,14 @@ public class MainActivity extends Activity {
 							}
 						}
 					}
+					/* ここの挙動についてもう一回確認すること！！ */
 					//全てのデータを表示し終えた後、表示される
-					if(array.size() == 0){
-						getSessionIdButton.setVisibility(View.INVISIBLE);
-					}else if(putCount >= array.size()){
-						getSessionIdButton.setVisibility(View.INVISIBLE);
-						login.append("以上です");
-					}
+					//if(array.size() == 0){
+					//	getSessionIdButton.setVisibility(View.INVISIBLE);
+					//}else if(putCount >= array.size()){
+					//	getSessionIdButton.setVisibility(View.INVISIBLE);
+					//	login.append("以上です");
+					//}
 				}
 			}
 		});
@@ -219,15 +222,6 @@ public class MainActivity extends Activity {
 		startActivity(intent);
 	}
 
-	// メニュー作成
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		getMenuInflater().inflate(R.menu.menu, menu);
-
-		return true;
-	}
-
 	// メニューアイテム選択イベント
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -236,7 +230,8 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.menu1:
 			// メニュー１選択時の処理（更新）
-			reload();
+			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.MainActivity");
+			startActivity(intent);
 			break;
 		case R.id.menu2:
 			// メニュー２選択時の処理（設定）

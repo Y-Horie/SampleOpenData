@@ -15,7 +15,6 @@ import org.apache.http.protocol.HttpContext;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
-import android.widget.Button;
 import android.widget.TextView;
 
 public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
@@ -30,7 +29,6 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 	private ProgressDialog progressDialog;
 	private String p_day;
 	private boolean ds;
-	private Button button;
 	private int c = 0;
 
 	public GetSessionIdAsyncTask(TextView textView, String g, String p, String b, int n,
@@ -46,7 +44,6 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 		this.progressDialog = pD; //グルグルを表示させる
 		this.p_day = p_day;
 		this.ds = data;
-		this.button = button;
 	}
 
 	@Override

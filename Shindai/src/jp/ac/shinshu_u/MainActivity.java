@@ -28,8 +28,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -71,6 +73,8 @@ public class MainActivity extends Activity {
 	private int eMonth = 0;
 	private int sDay = 0;
 	private int eDay = 0;
+	private int sYear = 0;
+	private int eYear = 0;
 	private ProgressDialog progressDialog;
 
 	static ArrayList<String> array = new ArrayList<String>();
@@ -171,6 +175,7 @@ public class MainActivity extends Activity {
 					// 最後にデータを取得した時のこと
 					SaveStartTime();
 
+					// データ取得用のインスタンスを生成
 					GetSessionIdAsyncTask getSessionIdAsyncTask =
 							new GetSessionIdAsyncTask(login, g, p, b_, n,
 									start, end, progressDialog, getPrevDay(), getStateData());
@@ -184,8 +189,9 @@ public class MainActivity extends Activity {
 					ATcondition = SystemInteger.on;
 					putCount = 0;
 
-					//取得したデータがある場合は
+				// 取得したデータがある場合
 				}else{
+					// 取得したデータに続きがある場合
 					if(array.size() != 0){
 						for(int j =  0; putCount < array.size(); j++){
 							if(j < n){
@@ -198,28 +204,26 @@ public class MainActivity extends Activity {
 							}
 						}
 					}
-					/* ここの挙動についてもう一回確認すること！！ */
-					//全てのデータを表示し終えた後、表示される
-					//if(array.size() == 0){
-					//	getSessionIdButton.setVisibility(View.INVISIBLE);
-					//}else if(putCount >= array.size()){
-					//	getSessionIdButton.setVisibility(View.INVISIBLE);
-					//	login.append("以上です");
-					//}
+					//全てのデータを表示し終えた後の処理
+					if(array.size() == 0){
+						getSessionIdButton.setVisibility(View.INVISIBLE);
+					}
+					if(putCount >= array.size()){
+						getSessionIdButton.setVisibility(View.INVISIBLE);
+						login.append("以上です");
+					}
 				}
 			}
 		});
 	}
 
-	// MainActivityの再起動
-	public void reload() {
-		Intent intent = getIntent();
-		overridePendingTransition(0, 0);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-		finish();
+	// メニュー作成
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(R.menu.menu, menu);
 
-		overridePendingTransition(0, 0);
-		startActivity(intent);
+		return true;
 	}
 
 	// メニューアイテム選択イベント
@@ -230,6 +234,7 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.menu1:
 			// メニュー１選択時の処理（更新）
+			array.clear(); //前に取得したデータの削除
 			intent.setClassName("jp.ac.shinshu_u", "jp.ac.shinshu_u.MainActivity");
 			startActivity(intent);
 			break;
@@ -251,7 +256,7 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	// ようこそ○○さん
+	// ようこそ画面について
 	private void setTxt(){
 		//表示領域用の変数
 		gakuseki = (TextView)findViewById(R.id.gakuseki);
@@ -270,6 +275,7 @@ public class MainActivity extends Activity {
 		}
 		text_r = str.toString();
 
+		// こんにちは○○さんを表示
 		gakuseki.setText("こんにちは" + name + " さん\n"
 				+ "前回の起動：" + text_r + "\n\n");
 	}
@@ -314,10 +320,10 @@ public class MainActivity extends Activity {
 
 	// 前回のデータ取得日時を取得
 	private String getPrevDay(){
-		//ついでに起動時間の事
 		String p_day;
 		String str ="";
 		try{
+			// データの読み込み
 			Context ctxt = createPackageContext("jp.ac.shinshu_u",0);
 			SharedPreferences pref1 =
 					ctxt.getSharedPreferences("data",MODE_PRIVATE);
@@ -325,6 +331,7 @@ public class MainActivity extends Activity {
 		}catch (NameNotFoundException e){
 			e.printStackTrace();
 		}
+		// 日時データを文字列に
 		p_day = str.toString();
 		return p_day;
 	}
@@ -365,27 +372,37 @@ public class MainActivity extends Activity {
 
 			//日付を格納する変数を場合分け
 			switch(attention){
+			// 開始日に関する処理
 			case a_start:
-				//確認用メッセージ
+				// 取得した日付の格納
+				sYear = year;
 				sMonth = monthOfYear;
 				sDay = dayOfMonth;
 				setday = (TextView)findViewById(R.id.start_st);
-				if(eMonth != 0 && (sMonth > eMonth || sDay > eDay)){
-					setday.setText("正しい開始日を指定してください");
+				start = day.toString();
+
+				// 適切かの判定
+				if(eYear != 0){
+					checkDay(start, sMonth, eMonth, sDay, eDay, sYear, eYear, setday);
 				}else{
-					start = day.toString();
+					setday.setTextColor(Color.GRAY);
 					setday.setText(start);
 				}
 				break;
+			// 終了日に関する処理
 			case a_end:
-				//確認用メッセージ
+				// 取得した日付の格納
+				eYear = year;
 				eMonth = monthOfYear;
 				eDay = dayOfMonth;
 				setday = (TextView)findViewById(R.id.end_st);
-				if(sMonth != 0 && (sMonth > eMonth || sDay > eDay)){
-					setday.setText("正しい終了日を指定してください");
+				end = day.toString();
+
+				// 適切かの判定
+				if(sYear != 0){
+					checkDay(end, sMonth, eMonth, sDay, eDay, sYear, eYear, setday);
 				}else{
-					end = day.toString();
+					setday.setTextColor(Color.GRAY);
 					setday.setText(end);
 				}
 				break;
@@ -394,6 +411,31 @@ public class MainActivity extends Activity {
 			}
 		}
 	};
+
+	// 入力された日付に関してのチェック
+	private void checkDay(String day, int sMonth, int eMonth, int sDay, int eDay,
+			int sYear, int eYear, TextView text){
+		// 初期値
+		text.setTextColor(Color.GRAY);
+		text.setText(day);
+
+		// 年をまたぐかどうか
+		if(sYear == eYear){
+			// 月をまたぐかどうか
+			if(sMonth == eMonth){
+				if(sDay > eDay){
+					text.setTextColor(Color.RED);
+					text.setText(day + "\n不適切です");
+				}
+			}else if(sMonth > eMonth){
+				text.setTextColor(Color.RED);
+				text.setText(day + "\n不適切です");
+			}
+		}else if(sYear > eYear){
+			text.setTextColor(Color.RED);
+			text.setText(day + "\n不適切です");
+		}
+	}
 
 	//1桁の月日を2桁に変換する
 	private String changeDay(int n){

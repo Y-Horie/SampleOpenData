@@ -65,8 +65,7 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 			String hogehoge;
 
 			if ((line = br.readLine()) != null) {
-				// カンマで分割するなら下記を参考に実装してください．
-				// カラムの数でハードコーディングしない方がいいと思う
+				// カンマで分ける
 				String[] RowData = line.split(",");
 				condition = RowData[0]; //SUCSEES or FAIL
 				hogehoge = RowData[1];  //sessionId
@@ -104,21 +103,19 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 		StringBuilder kyuukou = new StringBuilder();
 		StringBuilder data = new StringBuilder();
 
-		buf.append(LoginStrings.https);
-		buf.append(LoginStrings.kyuukou);
-		buf.append(LoginStrings.session);
-		buf.append(sessionId);
+		//ここまでですべてのデータが取得できる
+		buf.append(loginActivity.setGetData(sessionId));
 
 		// 新着情報のみを取得するか
 		if(ds == true){
-			buf.append("&");
+			buf.append(LoginStrings.and);
 			buf.append(LoginStrings.update);
 			buf.append(p_day);
 		}
 
 		//部局を選択するための処理
 		if(!b.equals("ALL")){
-			buf.append("&");
+			buf.append(LoginStrings.and);
 			buf.append(LoginStrings.bukyoku);
 			buf.append(b);
 		}
@@ -126,14 +123,14 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 		// startがnullでなければ開始日を指定
 		if(st != null){
 			//取得する日時を指定する処理　開始日
-			buf.append("&");
+			buf.append(LoginStrings.and);
 			buf.append(LoginStrings.start);
 			buf.append(st);
 		}
 
 		// endがnullでなければ終了日を指定
 		if(ed != null){
-			//部局を選択するための処理
+			//取得する日時を指定する処理　終了日
 			buf.append("&");
 			buf.append(LoginStrings.end);
 			buf.append(ed);
@@ -157,11 +154,12 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 			line = br.readLine();
 			//全件数を調べるためにnullまで回す
 			while ((line = br.readLine()) != null) {
+
+				// カンマで分割
+				String[] RowData = line.split(",");
+
 				//特定の数で止めるために比較する
 				if(i < n){
-					// カンマで分割するなら下記を参考に実装してください．
-					// カラムの数でハードコーディングしない方がいいと思う
-					String[] RowData = line.split(",");
 					kyuukou.append(RowData[3]); //開講部局
 					kyuukou.append("「");
 					kyuukou.append(RowData[6]); //講義名
@@ -180,6 +178,7 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 					kyuukou.append("年度");
 					kyuukou.append(RowData[14]); //開講区分
 					kyuukou.append("\n");
+
 					//連絡事項が無ければ読み飛ばす
 					if(!RowData[18].equals("\"\"")){
 						kyuukou.append("連絡事項：");
@@ -189,9 +188,10 @@ public class GetSessionIdAsyncTask extends AsyncTask<String, String, String> {
 					kyuukou.append("更新日：");
 					kyuukou.append(RowData[20]);
 					kyuukou.append("\n\n");
+
+					// 表示した数をカウント
 					i++;
 				}else{
-					String[] RowData = line.split(",");
 					data.append(RowData[3]); //開講部局
 					data.append("「");
 					data.append(RowData[6]); //講義名

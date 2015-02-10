@@ -24,6 +24,46 @@ public class loginActivity extends Activity {
 		buf.append(LoginStrings.Pass);
 		buf.append(p);
 
+		// 文字列へ変換
+		uri = buf.toString();
+
+		return uri;
+	}
+
+	public static String setGetNewData(String sessionId, String p_day){
+		StringBuilder buf = new StringBuilder();
+		String uri;
+
+		// 休講情報に関する文字列
+		buf.append(LoginStrings.https);
+		buf.append(LoginStrings.kyuukou);
+		buf.append(LoginStrings.session);
+
+		// 新しいデータ取得に関する文字列
+		buf.append(sessionId);
+		buf.append(LoginStrings.and);
+		buf.append(LoginStrings.update);
+		buf.append(p_day);
+
+		// 文字列へ変換
+		uri = buf.toString();
+
+		return uri;
+	}
+
+	public static String setGetData(String sessionId){
+		StringBuilder buf = new StringBuilder();
+		String uri;
+
+		// 休講情報に関する文字列
+		buf.append(LoginStrings.https);
+		buf.append(LoginStrings.kyuukou);
+		buf.append(LoginStrings.session);
+
+		// セッションIDまでを渡す
+		buf.append(sessionId);
+
+		// 文字列へ変換
 		uri = buf.toString();
 
 		return uri;
